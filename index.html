@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Space Trader</title>
+<title>Space Trader v1.1</title>
 <style>
 :root {
   --fg: #0f0;
@@ -268,7 +268,7 @@ function maybeGenerateRumor(isWaiting = false) {
   const mode = rumorModeForAction(isWaiting);
   const locNames = Object.keys(locations);
   const loc = locNames[Math.floor(Math.random() * locNames.length)];
-  const duration = isWaiting ? 1 + Math.floor(Math.random() * 3) : 2 + Math.floor(Math.random() * 4);
+  const duration = isWaiting ? 1 + Math.floor(Math.random() * 5) : 2 + Math.floor(Math.random() * 6);
   const baseStrength = isWaiting ? 1.2 + Math.random() * 0.5 : 1.4 + Math.random() * 0.8;
   const rumor = {
     loc,
@@ -351,6 +351,10 @@ function randomEvent() {
    UPGRADES
 ===================== */
 function upgradeCostFor(statName) {
+ if (statName=="cargoSpace" || statName=="maxFuel")
+  {
+    return 7 * (state[statName] + 1);
+  }
   return 100 * (state[statName] + 1);
 }
 
@@ -361,7 +365,14 @@ function upgrade(statName) {
     return;
   }
   state.credits -= cost;
+  if (statName=="cargoSpace" || statName=="maxFuel")
+  {
+      state[statName] += 20;
+  }
+  else{
   state[statName] += 1;
+  }
+  
   log(`Upgraded ${statName} to ${state[statName]}`, "pos");
   update();
 }
@@ -575,7 +586,7 @@ function renderTarget() {
   const canTravel = state.fuel >= fuelCost;
   const active = rumors.filter(r => r.loc === state.target);
   const rumorText = active.length
-    ? active.map(r => `${r.item} +${Math.round((r.strength - 1) * 100)}% (${r.expires - state.day}d left)`).join("<br>")
+    ? active.map(r => `${r.item} +${Math.round((r.strength - 1) * 100)}% Expires:${formatDate(r.expires)}(${r.expires - state.day}d left)`).join("<br>")
     : "None";
 
   document.getElementById("target").innerHTML = `
@@ -586,7 +597,7 @@ function renderTarget() {
     Police: ${loc.police}<br>
     Distance: ${dist}<br>
     Fuel Needed: ${fuelCost}<br>
-    ${isCurrent ? `Wait advances time by 1 day.` : `ETA: ${formatDate(state.day + dist)}`}<br>
+    ${isCurrent ? `Wait advances time by 1 day.` : `ETA: ${formatDate(state.day + dist)}  (${dist} Days of travel)`}<br>
     Specialty: ${loc.bonus}<br>
     Rumors:<br>${rumorText}<br>
     ${visitedLocations.has(state.target)
@@ -687,132 +698,6 @@ function refuel() {
   state.credits -= cost;
   state.fuel = state.maxFuel;
   log(`Refueled ${needed} for $${cost}`, "pos");
-  update();
-}
-
-function buyAll(name) {
-  const p = prices[name];
-  const qty = Math.min(Math.floor(state.credits / p), state.cargoSpace - cargoCount());
-  if (qty <= 0) return;
-  const g = goods.find(x => x.name === name);
-  if (!state.cargo[name]) state.cargo[name] = { qty: 0, totalSpent: 0, contraband: g.contraband };
-  state.cargo[name].qty += qty;
-  state.cargo[name].totalSpent += qty * p;
-  state.credits -= qty * p;
-  log(`Bought ${qty} ${name}`, "pos");
-  update();
-}
-
-function buy(name) {
-  const p = prices[name];
-  if (state.credits < p) return;
-  if (cargoCount() >= state.cargoSpace) return;
-  const g = goods.find(x => x.name === name);
-  if (!state.cargo[name]) state.cargo[name] = { qty: 0, totalSpent: 0, contraband: g.contraband };
-  state.cargo[name].qty += 1;
-  state.cargo[name].totalSpent += p;
-  state.credits -= p;
-  log(`Bought 1 ${name}`, "pos");
-  update();
-}
-
-function sell(name) {
-  const slot = state.cargo[name];
-  if (!slot || slot.qty <= 0) return;
-  const p = prices[name];
-  const avg = getAvg(name);
-  const profit = p - avg;
-  slot.qty -= 1;
-  slot.totalSpent = Math.max(0, slot.totalSpent - avg);
-  state.credits += p;
-  if (slot.qty <= 0) delete state.cargo[name];
-  log(`Sold 1 ${name} (${profit >= 0 ? '+' : ''}${profit})`, profit >= 0 ? 'pos' : 'neg');
-  update();
-}
-
-function sellAll(name) {
-  const slot = state.cargo[name];
-  if (!slot || slot.qty <= 0) return;
-  const p = prices[name];
-  const avg = getAvg(name);
-  const profit = (p - avg) * slot.qty;
-  state.credits += p * slot.qty;
-  delete state.cargo[name];
-  log(`Sold ALL ${name} (${profit >= 0 ? '+' : ''}${profit})`, profit >= 0 ? 'pos' : 'neg');
-  update();
-}
-
-function waitHere() {
-  const fee = 10 + Math.floor(state.day * 0.5);
-  if (state.credits < fee) {
-    log(`Not enough credits for docking fee ($${fee} needed)`, "neg");
-    return;
-  }
-
-  state.credits -= fee;
-  state.day += 1;
-  heat = Math.max(0, heat - 1);
-
-  cleanupRumors();
-  maybeGenerateRumor(true);
-  prices = getCurrentMarketPrices();
-
-  if (Math.random() < 0.45) randomEvent();
-
-  log(`Waited 1 day at ${state.location} (dock fee $${fee})`, "neutral");
-  update();
-}
-
-function travel(dest) {
-  if (!locations[dest]) return;
-  if (dest === state.location) {
-    waitHere();
-    return;
-  }
-
-  const d = travelDistance(state.location, dest);
-  const fuelCost = Math.max(1, Math.ceil(d / state.speed));
-  if (state.fuel < fuelCost) {
-    log(`Not enough fuel for ${dest} (${fuelCost} required)`, "neg");
-    return;
-  }
-
-  const origin = state.location;
-  state.fuel -= fuelCost;
-  state.day += d;
-  state.location = dest;
-  visitedLocations.add(dest);
-  heat = Math.max(0, heat - 1);
-
-  cleanupRumors();
-  maybeGenerateRumor(false);
-  prices = getCurrentMarketPrices();
-  randomEvent();
-
-  log(`Travel ${origin} → ${dest} (${d}d, fuel -${fuelCost})`, "neutral");
-  update();
-}
-
-/* =====================
-   UPGRADES
-===================== */
-function upgradeCostFor(statName) {
-  if (statName=="cargoSpace" || statName=="maxFuel")
-  {
-    return 5 * (state[statName] + 20);
-  }
-  return 100 * (state[statName] + 1);
-}
-
-function upgrade(statName) {
-  const cost = upgradeCostFor(statName);
-  if (state.credits < cost) {
-    log(`Not enough credits for ${statName}`, "neg");
-    return;
-  }
-  state.credits -= cost;
-  state[statName] += 1;
-  log(`Upgraded ${statName} to ${state[statName]}`, "pos");
   update();
 }
 
