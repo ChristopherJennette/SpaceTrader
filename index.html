@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Space Trader</title>
+<title>Space Trader v1.1</title>
 <style>
 :root {
   --fg: #0f0;
@@ -351,6 +351,10 @@ function randomEvent() {
    UPGRADES
 ===================== */
 function upgradeCostFor(statName) {
+ if (statName=="cargoSpace" || statName=="maxFuel")
+  {
+    return 7 * (state[statName] + 1);
+  }
   return 100 * (state[statName] + 1);
 }
 
@@ -361,7 +365,14 @@ function upgrade(statName) {
     return;
   }
   state.credits -= cost;
+  if (statName=="cargoSpace" || statName=="maxFuel")
+  {
+      state[statName] += 20;
+  }
+  else{
   state[statName] += 1;
+  }
+  
   log(`Upgraded ${statName} to ${state[statName]}`, "pos");
   update();
 }
