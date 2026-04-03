@@ -6,145 +6,125 @@
 <title>Space Trader</title>
 <style>
 :root {
-    --fg: #0f0;
-    --bg: #000;
-    --panel: #050505;
-    --line: #0f0;
-    --neg: #f55;
-    --pos: #5f5;
-    --warn: #ff0;
-    --muted: #88ff88;
+  --fg: #0f0;
+  --bg: #000;
+  --panel: #050505;
+  --line: #0f0;
+  --neg: #f55;
+  --pos: #5f5;
+  --warn: #ff0;
+  --muted: #88ff88;
 }
-
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 body {
-    margin: 0;
-    padding: 12px;
-    background: var(--bg);
-    color: var(--fg);
-    font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 12px;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: Arial, sans-serif;
 }
-
 h2 { margin: 0 0 12px 0; font-size: 22px; }
-
-.app {
-    display: grid;
-    grid-template-columns: minmax(320px, 1fr) 360px;
-    grid-template-rows: auto 1fr auto auto;
-    grid-template-areas:
-        "status target"
-        "map target"
-        "exchange exchange"
-        "console console";
-    gap: 10px;
-    align-items: stretch;
+button {
+  margin: 2px;
+  background: #101010;
+  color: var(--fg);
+  border: 1px solid var(--line);
+  padding: 4px 8px;
+  cursor: pointer;
 }
-
+button:hover { background: #1b1b1b; }
+button:disabled { opacity: .45; cursor: not-allowed; }
 .panel {
-    border: 1px solid var(--line);
-    background: var(--panel);
-    padding: 10px;
-    min-width: 0;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 10px;
+  min-width: 0;
 }
-
+.app {
+  display: grid;
+  grid-template-columns: 220px minmax(320px, 1fr) 360px;
+  grid-template-rows: auto auto 1fr auto auto;
+  grid-template-areas:
+    "ship status target"
+    "ship actions target"
+    "ship map target"
+    "exchange exchange exchange"
+    "console console console";
+  gap: 10px;
+  align-items: stretch;
+}
+#ship { grid-area: ship; }
 #status { grid-area: status; }
+#actions { grid-area: actions; }
 #target { grid-area: target; height: 100%; overflow: auto; }
 #mapPanel { grid-area: map; min-height: 280px; }
-#market { grid-area: exchange; }
-#console { grid-area: console; }
-
-.table-wrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-th, td {
-    border: 1px solid var(--line);
-    padding: 6px;
-    text-align: center;
-    vertical-align: middle;
-    word-wrap: break-word;
-}
-button {
-    margin: 2px;
-    background: #101010;
-    color: var(--fg);
-    border: 1px solid var(--line);
-    padding: 4px 8px;
-    cursor: pointer;
-}
-button:hover { background: #1c1c1c; }
-button:disabled { opacity: 0.5; cursor: not-allowed; }
+#exchange { grid-area: exchange; }
+#console { grid-area: console; max-height: 220px; overflow: auto; font-family: monospace; }
+.small { font-size: 12px; opacity: .9; }
 .bad { color: var(--neg); }
 .goodprice { color: var(--pos); }
-.small { font-size: 12px; opacity: 0.9; }
-.console {
-    max-height: 240px;
-    overflow-y: auto;
-    background: #111;
-    font-family: monospace;
-}
 .log-pos { color: var(--pos); }
 .log-neg { color: var(--neg); }
-.log-neutral { color: var(--fg); }
 .log-warn { color: var(--warn); }
-
+.log-neutral { color: var(--fg); }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+th, td { border: 1px solid var(--line); padding: 6px; text-align: center; vertical-align: middle; word-wrap: break-word; }
 .map-title {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    align-items: baseline;
-    margin-bottom: 8px;
+  display: flex; justify-content: space-between; gap: 10px; align-items: baseline; margin-bottom: 8px;
 }
 .map-shell {
-    position: relative;
-    width: 100%;
-    height: 280px;
-    border: 1px solid var(--line);
-    overflow: hidden;
-    background:
-        radial-gradient(circle at 50% 50%, rgba(0,255,0,0.06), transparent 55%),
-        linear-gradient(180deg, rgba(0,255,0,0.04), rgba(0,0,0,0));
+  position: relative;
+  width: 100%;
+  height: 280px;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(0,255,0,.06), transparent 55%),
+    linear-gradient(180deg, rgba(0,255,0,.04), rgba(0,0,0,0));
 }
 .map-node {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    font-size: 11px;
-    text-align: center;
-    line-height: 1.1;
-    white-space: nowrap;
-    cursor: pointer;
-    user-select: none;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 11px;
+  text-align: center;
+  line-height: 1.1;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
 }
 .map-node .dot {
-    display: block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin: 0 auto 3px auto;
-    background: currentColor;
-    box-shadow: 0 0 8px currentColor;
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin: 0 auto 3px auto;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
 }
 .map-node.current .dot { width: 12px; height: 12px; }
 .map-node.selected { text-decoration: underline; }
-.route-line {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-}
+.route-line { position: absolute; inset: 0; pointer-events: none; }
 .base-price-table { margin-top: 8px; }
 .base-price-table td, .base-price-table th { font-size: 12px; }
-
+.ship-section { margin-bottom: 10px; }
+.ship-section hr { border: 0; border-top: 1px solid var(--line); margin: 8px 0; }
+.actions-grid { display: grid; gap: 6px; }
+.actions-grid .row { display: flex; flex-wrap: wrap; gap: 4px; }
 @media (max-width: 900px) {
-    .app {
-        grid-template-columns: 1fr;
-        grid-template-areas:
-            "status"
-            "target"
-            "map"
-            "exchange"
-            "console";
-    }
-    #target { height: auto; }
-    #mapPanel { min-height: 240px; }
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "ship"
+      "status"
+      "actions"
+      "target"
+      "map"
+      "exchange"
+      "console";
+  }
+  #target { height: auto; }
 }
 </style>
 </head>
@@ -152,525 +132,702 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 <h2>Space Trader</h2>
 
 <div class="app">
-    <div class="panel" id="status"></div>
-    <div class="panel" id="target"></div>
+  <div class="panel" id="ship"></div>
+  <div class="panel" id="status"></div>
+  <div class="panel" id="actions"></div>
 
-    <div class="panel" id="mapPanel">
-        <div class="map-title">
-            <b>Map</b>
-            <span class="small">Click a location to target it</span>
-        </div>
-        <div class="map-shell" id="mapShell"></div>
+  <div class="panel" id="target"></div>
+
+  <div class="panel" id="mapPanel">
+    <div class="map-title">
+      <b>Map</b>
+      <span class="small">Click a location to target it</span>
     </div>
+    <div class="map-shell" id="mapShell"></div>
+  </div>
 
-    <div class="panel" id="market"></div>
-    <div class="panel console" id="console"></div>
+  <div class="panel" id="exchange"></div>
+  <div class="panel" id="console"></div>
 </div>
 
 <script>
 /* =====================
    STATE
-   ===================== */
+===================== */
 const state = {
-    location: "Earth",
-    credits: 1000,
-    fuel: 20,
-    maxFuel: 20,
-    cargoSpace: 20,
-    cargo: {},
-    day: 1
+  location: "Earth",
+  target: "Earth",
+  credits: 1000,
+  fuel: 20,
+  maxFuel: 20,
+  cargoSpace: 20,
+  cargo: {},
+  day: 1,
+  smuggle: 0,
+  shield: 0,
+  speed: 1
 };
 
 let heat = 0;
-let rumors = []; // { loc, item, strength, expires }
 let prices = {};
 let logs = [];
-let target = null;
+let rumors = []; // { loc, item, strength, expires, kind }
 let visitedLocations = new Set(["Earth"]);
 
 /* =====================
-   COMMODITIES
-   ===================== */
+   DATA
+===================== */
 const goods = [
-    { name: "Food", base: 10, contraband: false },
-    { name: "Ore", base: 25, contraband: false },
-    { name: "Tech", base: 100, contraband: false },
-    { name: "Luxury", base: 150, contraband: false },
-    { name: "Gas", base: 60, contraband: false },
-    { name: "Spice", base: 250, contraband: true },
-    { name: "Weapons", base: 500, contraband: true }
+  { name: "Food", base: 10, contraband: false },
+  { name: "Ore", base: 25, contraband: false },
+  { name: "Tech", base: 100, contraband: false },
+  { name: "Luxury", base: 150, contraband: false },
+  { name: "Gas", base: 60, contraband: false },
+  { name: "Spice", base: 250, contraband: true },
+  { name: "Weapons", base: 500, contraband: true }
 ];
 
-function buildBasePrices(mods) {
-    const out = {};
-    for (const g of goods) {
-        const mod = mods[g.name] ?? 1;
-        out[g.name] = Math.max(1, Math.round(g.base * mod));
-    }
-    return out;
+function buildBasePrices(multipliers) {
+  const out = {};
+  for (const g of goods) {
+    out[g.name] = Math.max(1, Math.round(g.base * (multipliers[g.name] ?? 1)));
+  }
+  return out;
 }
 
-/* =====================
-   WORLD DATA
-   ===================== */
 const locations = {
-    Earth: {
-        dist: 0,
-        bonus: "Tech",
-        fuelRate: 5,
-        x: 18,
-        y: 80,
-        faction: "Federation",
-        police: 3,
-        lore: "Core trade hub. Stable and expensive.",
-        basePrices: buildBasePrices({ Food: 1.25, Ore: 1.15, Tech: 0.75, Luxury: 1.35, Gas: 1.05, Spice: 1.6, Weapons: 1.8 })
-    },
-    Mars: {
-        dist: 3,
-        bonus: "Ore",
-        fuelRate: 6,
-        x: 32,
-        y: 70,
-        faction: "Miners Guild",
-        police: 2,
-        lore: "Industrial mining world.",
-        basePrices: buildBasePrices({ Food: 1.2, Ore: 0.7, Tech: 1.25, Luxury: 1.15, Gas: 1.1, Spice: 1.4, Weapons: 1.6 })
-    },
-    Venus: {
-        dist: 2,
-        bonus: "Luxury",
-        fuelRate: 6,
-        x: 25,
-        y: 88,
-        faction: "Syndicate",
-        police: 1,
-        lore: "Pleasure world. Weak enforcement.",
-        basePrices: buildBasePrices({ Food: 1.35, Ore: 1.25, Tech: 1.1, Luxury: 0.75, Gas: 1.0, Spice: 1.3, Weapons: 1.5 })
-    },
-    "Jupiter Station": {
-        dist: 6,
-        bonus: "Food",
-        fuelRate: 7,
-        x: 56,
-        y: 54,
-        faction: "Federation",
-        police: 3,
-        lore: "Mass population demand.",
-        basePrices: buildBasePrices({ Food: 0.7, Ore: 1.1, Tech: 1.1, Luxury: 1.2, Gas: 1.0, Spice: 1.2, Weapons: 1.5 })
-    },
-    Saturn: {
-        dist: 7,
-        bonus: "Gas",
-        fuelRate: 8,
-        x: 68,
-        y: 42,
-        faction: "Independents",
-        police: 2,
-        lore: "Fuel extraction zone.",
-        basePrices: buildBasePrices({ Food: 1.1, Ore: 1.0, Tech: 1.15, Luxury: 1.1, Gas: 0.7, Spice: 1.1, Weapons: 1.4 })
-    },
-    "Titan Outpost": {
-        dist: 8,
-        bonus: "Spice",
-        fuelRate: 9,
-        x: 80,
-        y: 30,
-        faction: "Cartel",
-        police: 1,
-        lore: "Contraband hotspot.",
-        basePrices: buildBasePrices({ Food: 1.2, Ore: 1.1, Tech: 1.2, Luxury: 1.05, Gas: 1.0, Spice: 0.8, Weapons: 1.3 })
-    },
-    Neptune: {
-        dist: 10,
-        bonus: "Weapons",
-        fuelRate: 10,
-        x: 92,
-        y: 18,
-        faction: "Warlords",
-        police: 0,
-        lore: "Lawless arms market.",
-        basePrices: buildBasePrices({ Food: 1.4, Ore: 1.2, Tech: 1.3, Luxury: 1.2, Gas: 1.15, Spice: 1.25, Weapons: 0.75 })
-    }
+  Earth: {
+    x: 18, y: 78, dist: 0, faction: "Federation", police: 3,
+    lore: "Core trade hub. Stable and expensive.", bonus: "Tech",
+    basePrices: buildBasePrices({ Food: 1.2, Ore: 1.15, Tech: 0.75, Luxury: 1.25, Gas: 1.05, Spice: 1.6, Weapons: 1.8 })
+  },
+  Mars: {
+    x: 32, y: 68, dist: 3, faction: "Miners Guild", police: 2,
+    lore: "Industrial mining world.", bonus: "Ore",
+    basePrices: buildBasePrices({ Food: 1.15, Ore: 0.7, Tech: 1.2, Luxury: 1.1, Gas: 1.05, Spice: 1.35, Weapons: 1.55 })
+  },
+  Venus: {
+    x: 25, y: 88, dist: 2, faction: "Syndicate", police: 1,
+    lore: "Pleasure world. Weak enforcement.", bonus: "Luxury",
+    basePrices: buildBasePrices({ Food: 1.3, Ore: 1.2, Tech: 1.05, Luxury: 0.75, Gas: 1.0, Spice: 1.2, Weapons: 1.45 })
+  },
+  "Jupiter Station": {
+    x: 56, y: 54, dist: 6, faction: "Federation", police: 3,
+    lore: "Mass population demand.", bonus: "Food",
+    basePrices: buildBasePrices({ Food: 0.7, Ore: 1.1, Tech: 1.1, Luxury: 1.15, Gas: 1.0, Spice: 1.25, Weapons: 1.4 })
+  }
 };
 
 /* =====================
-   TIME / DATE
-   ===================== */
-function formatDate(dayNumber) {
-    const month = Math.floor((dayNumber - 1) / 30) + 1;
-    const dayOfMonth = ((dayNumber - 1) % 30) + 1;
-    return `Month ${month}, Day ${dayOfMonth}`;
+   HELPERS
+===================== */
+function cargoCount() {
+  return Object.values(state.cargo).reduce((sum, slot) => sum + (slot.qty || 0), 0);
+}
+
+function formatDate(dayNum) {
+  const month = Math.floor((dayNum - 1) / 30) + 1;
+  const dayOfMonth = ((dayNum - 1) % 30) + 1;
+  return `Month ${month}, Day ${dayOfMonth}`;
+}
+
+function travelDistance(a, b) {
+  return Math.abs(locations[a].dist - locations[b].dist);
+}
+
+function getAvg(name) {
+  const slot = state.cargo[name];
+  if (!slot || slot.qty <= 0) return 0;
+  return Math.round(slot.totalSpent / slot.qty);
+}
+
+function getCurrentMarketPrices() {
+  const loc = locations[state.location];
+  const out = {};
+  for (const g of goods) {
+    let p = Math.floor(loc.basePrices[g.name] * (0.85 + Math.random() * 0.3));
+    for (const r of rumors) {
+      if (r.loc === state.location && r.item === g.name) p *= r.strength;
+    }
+    out[g.name] = Math.max(1, Math.floor(p));
+  }
+  return out;
+}
+
+function cleanupRumors() {
+  rumors = rumors.filter(r => r.expires > state.day);
+}
+
+function rumorModeForAction(isWaiting) {
+  // travel rumors favor destination, waiting rumors favor broader market changes
+  return isWaiting ? ["market", "drift"] : ["route", "spike"];
+}
+
+function maybeGenerateRumor(isWaiting = false) {
+  if (Math.random() >= 0.6) return;
+  const mode = rumorModeForAction(isWaiting);
+  const locNames = Object.keys(locations);
+  const loc = locNames[Math.floor(Math.random() * locNames.length)];
+  const duration = isWaiting ? 1 + Math.floor(Math.random() * 3) : 2 + Math.floor(Math.random() * 4);
+  const baseStrength = isWaiting ? 1.2 + Math.random() * 0.5 : 1.4 + Math.random() * 0.8;
+  const rumor = {
+    loc,
+    item: locations[loc].bonus,
+    strength: baseStrength,
+    expires: state.day + duration,
+    kind: mode[Math.floor(Math.random() * mode.length)]
+  };
+  rumors.push(rumor);
+  log(`Rumor: ${rumor.item} surge at ${loc} (${duration}d)`, "warn");
 }
 
 /* =====================
    LOGGING
-   ===================== */
+===================== */
 function log(msg, type = "neutral") {
-    logs.unshift({ msg, type });
-    if (logs.length > 100) logs.pop();
-    renderConsole();
+  logs.unshift({ msg, type });
+  if (logs.length > 100) logs.pop();
+  renderConsole();
 }
 
 function renderConsole() {
-    document.getElementById("console").innerHTML = logs
-        .map(entry => `<div class="log-${entry.type}">${entry.msg}</div>`)
-        .join("");
+  document.getElementById("console").innerHTML = logs
+    .map(l => `<div class="log-${l.type}">Day ${state.day}: ${l.msg}</div>`)
+    .join("");
 }
 
 /* =====================
-   RUMORS
-   ===================== */
-function generateRumor() {
-    const names = Object.keys(locations);
-    const loc = names[Math.floor(Math.random() * names.length)];
-    const duration = 2 + Math.floor(Math.random() * 4);
-    rumors.push({
-        loc,
-        item: locations[loc].bonus,
-        strength: 1.5 + Math.random(),
-        expires: state.day + duration
-    });
-    log(`Rumor: ${locations[loc].bonus} surge at ${loc} (${duration}d)`, "warn");
+   EVENTS / INSPECTIONS
+===================== */
+function inspectionEvent() {
+  const police = locations[state.location].police;
+  const contrabandQty = Object.values(state.cargo)
+    .filter(s => s.contraband)
+    .reduce((sum, s) => sum + s.qty, 0);
+
+  if (contrabandQty === 0) {
+    log("Inspection: nothing found", "pos");
+    heat = Math.max(0, heat - 1);
+    return;
+  }
+
+  const risk = police + heat - state.smuggle - state.shield;
+  const roll = Math.random() * 5;
+
+  if (roll < risk) {
+    let lost = 0;
+    for (const [name, slot] of Object.entries(state.cargo)) {
+      if (!slot.contraband || slot.qty <= 0) continue;
+      const loss = Math.max(1, Math.ceil(slot.qty * 0.35));
+      slot.qty -= loss;
+      slot.totalSpent = Math.max(0, slot.totalSpent - getAvg(name) * loss);
+      lost += loss;
+      if (slot.qty <= 0) delete state.cargo[name];
+    }
+    heat += 1;
+    log(`Inspection confiscated contraband (${lost})`, "neg");
+  } else {
+    heat = Math.max(0, heat - 1);
+    log("Inspection passed", "pos");
+  }
 }
 
-function cleanupRumors() {
-    rumors = rumors.filter(r => r.expires > state.day);
+function randomEvent() {
+  const r = Math.random();
+  if (r < 0.16) {
+    const loss = Math.min(200, state.credits);
+    state.credits -= loss;
+    log(`Pirates hit you (-$${loss})`, "neg");
+  } else if (r < 0.32) {
+    const gain = 100 + Math.floor(Math.random() * 200);
+    state.credits += gain;
+    log(`Found salvage (+$${gain})`, "pos");
+  } else if (r < 0.55) {
+    inspectionEvent();
+  }
 }
 
 /* =====================
-   PRICES
-   ===================== */
-function randPriceFromBase(base) {
-    return Math.floor(base * (0.85 + Math.random() * 0.3));
+   UPGRADES
+===================== */
+function upgradeCostFor(statName) {
+  return 100 * (state[statName] + 1);
 }
 
-function getPrices() {
-    const loc = locations[state.location];
-    const out = {};
-
-    for (const g of goods) {
-        let p = randPriceFromBase(loc.basePrices[g.name]);
-        for (const r of rumors) {
-            if (r.loc === state.location && r.item === g.name) {
-                p *= r.strength;
-            }
-        }
-        out[g.name] = Math.max(1, Math.floor(p));
-    }
-
-    return out;
-}
-
-/* =====================
-   HELPERS
-   ===================== */
-function cargoUsed() {
-    return Object.values(state.cargo).reduce((sum, slot) => sum + slot.qty, 0);
-}
-
-function getAvg(itemName) {
-    const slot = state.cargo[itemName];
-    return (!slot || slot.qty === 0) ? 0 : Math.round(slot.totalSpent / slot.qty);
-}
-
-function getPercent(g) {
-    const base = locations[state.location].basePrices[g.name];
-    return Math.round(((prices[g.name] - base) / base) * 100);
-}
-
-function travelDistance(from, to) {
-    return Math.abs(locations[to].dist - locations[from].dist);
-}
-
-/* =====================
-   MAP
-   ===================== */
-function renderMap() {
-    const map = document.getElementById("mapShell");
-    const w = map.clientWidth || 300;
-    const h = map.clientHeight || 280;
-    const px = (pct, size) => (pct / 100) * size;
-    let html = "";
-
-    if (target && target !== state.location) {
-        const a = locations[state.location];
-        const b = locations[target];
-        html += `<svg class="route-line" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
-            <line x1="${px(a.x, w)}" y1="${px(a.y, h)}" x2="${px(b.x, w)}" y2="${px(b.y, h)}" stroke="#0f0" stroke-width="2" stroke-dasharray="6,5" />
-        </svg>`;
-    }
-
-    for (const [name, loc] of Object.entries(locations)) {
-        const dist = travelDistance(state.location, name);
-        const reachable = state.fuel >= dist;
-        const isCurrent = name === state.location;
-        const isTarget = name === target;
-        const color = isCurrent ? "#ff0" : (reachable ? "#0f0" : "#555");
-        const hint = rumors.some(r => r.loc === name) ? "⚠ " : "";
-
-        html += `
-            <div class="map-node ${isCurrent ? "current" : ""} ${isTarget ? "selected" : ""}"
-                 style="left:${loc.x}%; top:${loc.y}%; color:${color}"
-                 onclick="setTarget('${name}')">
-                <span class="dot"></span>
-                <span>${hint}${name}</span>
-            </div>
-        `;
-    }
-
-    map.innerHTML = html;
-}
-
-function setTarget(name) {
-    target = name;
-    renderTarget();
-    renderMap();
-}
-
-function renderBasePricesTable(locName) {
-    const basePrices = locations[locName].basePrices;
-    let html = `<div class="base-price-table"><b>Known base prices</b><br><div class="table-wrap"><table>
-        <tr><th>Commodity</th><th>Base</th></tr>`;
-
-    for (const g of goods) {
-        html += `<tr><td>${g.contraband ? "<span class='bad'>⚠</span> " : ""}${g.name}</td><td>$${basePrices[g.name]}</td></tr>`;
-    }
-
-    html += `</table></div><div class="small"><span class='bad'>⚠</span> = Contraband</div></div>`;
-    return html;
-}
-
-function renderTarget() {
-    const panel = document.getElementById("target");
-    if (!target) {
-        panel.innerHTML = `<b>Target</b><br>Select a location on the map.`;
-        return;
-    }
-
-    const loc = locations[target];
-    const dist = travelDistance(state.location, target);
-    const isCurrent = target === state.location;
-    const canTravel = state.fuel >= dist;
-    const active = rumors.filter(r => r.loc === target);
-    const rumorTxt = active.length
-        ? active.map(r => `${r.item} +${Math.round((r.strength - 1) * 100)}% (${r.expires - state.day}d left)`).join("<br>")
-        : "None";
-    const actionLabel = isCurrent ? "Wait 1 Day" : (canTravel ? "Travel" : "Travel (No Fuel)");
-    const actionOnClick = isCurrent ? 'waitHere()' : `travel('${target}')`;
-
-    panel.innerHTML = `
-        <b>Target</b><br>
-        ${isCurrent ? `${target} (Current Location)` : target}<br>
-        ${loc.lore}<br>
-        Faction: ${loc.faction}<br>
-        Police: ${loc.police}<br>
-        Distance: ${dist}<br>
-        Fuel Needed: ${dist}<br>
-        ${isCurrent ? `Wait advances time by 1 day.` : `ETA: ${formatDate(state.day + dist)}`}<br>
-        Specialty: ${loc.bonus}<br>
-        Rumors:<br>${rumorTxt}<br>
-        ${visitedLocations.has(target) ? renderBasePricesTable(target) : `<br><b>Known base prices</b><br>Visit this location to reveal its base commodity prices.`}
-        <br>
-        <button onclick="${actionOnClick}" ${(!isCurrent && !canTravel) ? 'disabled' : ''}>
-            ${actionLabel}
-        </button>
-    `;
-}
-
-/* =====================
-   UI
-   ===================== */
-function updateUI() {
-    document.getElementById("status").innerHTML = `
-        <b>Status</b><br>
-        Location: ${state.location}<br>
-        Date: ${formatDate(state.day)}<br>
-        Credits: ${state.credits}<br>
-        Cargo: ${cargoUsed()}/${state.cargoSpace}<br>
-        Fuel: ${state.fuel}/${state.maxFuel} <button onclick="refuel()">Refuel</button><br>
-        Heat: ${heat}<br>
-        <span class="small">Fuel rate at current location: $${locations[state.location].fuelRate}/unit</span>
-    `;
-
-    let marketHTML = `<b>Exchange</b><br><div class="table-wrap"><table>
-        <tr>
-            <th>Item</th>
-            <th>Price</th>
-            <th>%</th>
-            <th>Owned (Avg)</th>
-            <th>Buy</th>
-            <th>Sell</th>
-        </tr>`;
-
-    for (const g of goods) {
-        const owned = state.cargo[g.name]?.qty || 0;
-        const avg = getAvg(g.name);
-        const pct = getPercent(g);
-        const pctClass = pct < 0 ? "goodprice" : "bad";
-
-        marketHTML += `
-            <tr>
-                <td>${g.contraband ? "<span class='bad'>⚠</span> " : ""}${g.name}</td>
-                <td>$${prices[g.name]}</td>
-                <td class="${pctClass}">${pct > 0 ? "+" : ""}${pct}%</td>
-                <td>${owned} @ $${avg}</td>
-                <td>
-                    <button onclick="buy('${g.name}')">1</button>
-                    <button onclick="buyMax('${g.name}')">All</button>
-                </td>
-                <td>
-                    <button onclick="sell('${g.name}')">1</button>
-                    <button onclick="sellAll('${g.name}')">All</button>
-                </td>
-            </tr>`;
-    }
-
-    marketHTML += `</table></div>`;
-    document.getElementById("market").innerHTML = marketHTML;
-
-    renderTarget();
-    renderMap();
+function upgrade(statName) {
+  const cost = upgradeCostFor(statName);
+  if (state.credits < cost) {
+    log(`Not enough credits for ${statName}`, "neg");
+    return;
+  }
+  state.credits -= cost;
+  state[statName] += 1;
+  log(`Upgraded ${statName} to ${state[statName]}`, "pos");
+  update();
 }
 
 /* =====================
    TRADE
-   ===================== */
+===================== */
 function buy(name) {
-    const price = prices[name];
-    if (state.credits < price) return;
-    if (cargoUsed() >= state.cargoSpace) return;
+  const p = prices[name];
+  if (state.credits < p) return;
+  if (cargoCount() >= state.cargoSpace) return;
 
-    if (!state.cargo[name]) state.cargo[name] = { qty: 0, totalSpent: 0 };
-    state.cargo[name].qty += 1;
-    state.cargo[name].totalSpent += price;
-    state.credits -= price;
-
-    log(`Buy 1 ${name} @ $${price}`, "neutral");
-    updateUI();
+  const g = goods.find(x => x.name === name);
+  if (!state.cargo[name]) {
+    state.cargo[name] = { qty: 0, totalSpent: 0, contraband: g.contraband };
+  }
+  state.cargo[name].qty += 1;
+  state.cargo[name].totalSpent += p;
+  state.credits -= p;
+  log(`Bought ${name} for $${p}`, "pos");
+  update();
 }
 
-function buyMax(name) {
-    const price = prices[name];
-    const qty = Math.min(Math.floor(state.credits / price), state.cargoSpace - cargoUsed());
-    if (qty <= 0) return;
-
-    if (!state.cargo[name]) state.cargo[name] = { qty: 0, totalSpent: 0 };
-    state.cargo[name].qty += qty;
-    state.cargo[name].totalSpent += qty * price;
-    state.credits -= qty * price;
-
-    log(`Buy ${qty} ${name} @ $${price}`, "neutral");
-    updateUI();
+function buyAll(name) {
+  const p = prices[name];
+  const qty = Math.min(Math.floor(state.credits / p), state.cargoSpace - cargoCount());
+  if (qty <= 0) return;
+  const g = goods.find(x => x.name === name);
+  if (!state.cargo[name]) {
+    state.cargo[name] = { qty: 0, totalSpent: 0, contraband: g.contraband };
+  }
+  state.cargo[name].qty += qty;
+  state.cargo[name].totalSpent += qty * p;
+  state.credits -= qty * p;
+  log(`Bought ${qty} ${name}`, "pos");
+  update();
 }
 
 function sell(name) {
-    const slot = state.cargo[name];
-    if (!slot) return;
+  const slot = state.cargo[name];
+  if (!slot || slot.qty <= 0) return;
 
-    const avg = getAvg(name);
-    const price = prices[name];
-    const profit = price - avg;
+  const p = prices[name];
+  const avg = getAvg(name);
+  const profit = p - avg;
 
-    slot.qty -= 1;
-    slot.totalSpent = Math.max(0, slot.totalSpent - avg);
-    state.credits += price;
-    if (slot.qty <= 0) delete state.cargo[name];
-
-    log(`Sell 1 ${name} @ $${price} (${profit >= 0 ? "+" : ""}${profit})`, profit >= 0 ? "pos" : "neg");
-    updateUI();
+  slot.qty -= 1;
+  slot.totalSpent = Math.max(0, slot.totalSpent - avg);
+  state.credits += p;
+  if (slot.qty <= 0) delete state.cargo[name];
+  log(`Sold 1 ${name} (${profit >= 0 ? '+' : ''}${profit})`, profit >= 0 ? 'pos' : 'neg');
+  update();
 }
 
 function sellAll(name) {
-    const slot = state.cargo[name];
-    if (!slot) return;
-
-    const avg = getAvg(name);
-    const price = prices[name];
-    const profit = (price - avg) * slot.qty;
-
-    state.credits += price * slot.qty;
-    delete state.cargo[name];
-
-    log(`Sell ALL ${name} (${profit >= 0 ? "+" : ""}${profit})`, profit >= 0 ? "pos" : "neg");
-    updateUI();
+  const slot = state.cargo[name];
+  if (!slot || slot.qty <= 0) return;
+  const p = prices[name];
+  const avg = getAvg(name);
+  const profit = (p - avg) * slot.qty;
+  state.credits += p * slot.qty;
+  delete state.cargo[name];
+  log(`Sold ALL ${name} (${profit >= 0 ? '+' : ''}${profit})`, profit >= 0 ? 'pos' : 'neg');
+  update();
 }
 
 /* =====================
-   FUEL / WAIT
-   ===================== */
+   WAIT / TRAVEL
+===================== */
+function waitHere() {
+  const fee = 10;
+  if (state.credits < fee) {
+    log(`Not enough credits for docking fee ($${fee} needed)`, "neg");
+    return;
+  }
+
+  state.credits -= fee;
+  state.day += 1;
+  heat = Math.max(0, heat - 1);
+
+  cleanupRumors();
+  maybeGenerateRumor(true);
+  prices = getCurrentMarketPrices();
+
+  // Waiting can still cause events.
+  if (Math.random() < 0.45) randomEvent();
+
+  log(`Waited 1 day at ${state.location} (dock fee $${fee})`, "neutral");
+  update();
+}
+
+function travel(dest) {
+  if (!locations[dest]) return;
+  if (dest === state.location) {
+    waitHere();
+    return;
+  }
+
+  const d = travelDistance(state.location, dest);
+  const fuelCost = Math.max(1, Math.ceil(d / state.speed));
+  if (state.fuel < fuelCost) {
+    log(`Not enough fuel for ${dest} (${fuelCost} required)`, "neg");
+    return;
+  }
+
+  const origin = state.location;
+  state.fuel -= fuelCost;
+  state.day += d;
+  state.location = dest;
+  visitedLocations.add(dest);
+  heat = Math.max(0, heat - 1);
+
+  cleanupRumors();
+  maybeGenerateRumor(false);
+  prices = getCurrentMarketPrices();
+  randomEvent();
+
+  log(`Travel ${origin} → ${dest} (${d}d, fuel -${fuelCost})`, "neutral");
+  update();
+}
+
+/* =====================
+   RENDERERS
+===================== */
+function renderShip() {
+  const cargoUpgradeCost = upgradeCostFor('cargoSpace');
+  const fuelUpgradeCost = upgradeCostFor('maxFuel');
+  const smuggleUpgradeCost = upgradeCostFor('smuggle');
+  const shieldUpgradeCost = upgradeCostFor('shield');
+  const speedUpgradeCost = upgradeCostFor('speed');
+
+  document.getElementById("ship").innerHTML = `
+    <b>Ship</b>
+    <hr>
+    <div class="ship-section">
+      <b>Cargo</b><br>
+      ${cargoCount()} / ${state.cargoSpace}<br>
+      <button onclick="upgrade('cargoSpace')">Upgrade (+$${cargoUpgradeCost})</button>
+    </div>
+    <hr>
+    <div class="ship-section">
+      <b>Fuel</b><br>
+      ${state.fuel} / ${state.maxFuel}<br>
+      <button onclick="upgrade('maxFuel')">Upgrade (+$${fuelUpgradeCost})</button>
+    </div>
+    <hr>
+    <div class="ship-section">
+      <b>Speed</b><br>
+      Level: ${state.speed}<br>
+      <button onclick="upgrade('speed')">Upgrade (+$${speedUpgradeCost})</button>
+    </div>
+    <hr>
+    <div class="ship-section">
+      <b>Smuggling</b><br>
+      Level: ${state.smuggle}<br>
+      <button onclick="upgrade('smuggle')">Upgrade (+$${smuggleUpgradeCost})</button>
+    </div>
+    <hr>
+    <div class="ship-section">
+      <b>Shielding</b><br>
+      Level: ${state.shield}<br>
+      <button onclick="upgrade('shield')">Upgrade (+$${shieldUpgradeCost})</button>
+    </div>
+  `;
+}
+
+function renderStatus() {
+  document.getElementById("status").innerHTML = `
+    <b>Status</b><br>
+    Location: ${state.location}<br>
+    Date: ${formatDate(state.day)}<br>
+    Credits: ${state.credits}<br>
+    Heat: ${heat}<br>
+  `;
+}
+
+function renderActions() {
+  const canRefuel = state.fuel < state.maxFuel;
+  const refuelCost = Math.max(0, (state.maxFuel - state.fuel) * locations[state.location].police);
+  document.getElementById("actions").innerHTML = `
+    <b>Actions</b>
+    <div class="actions-grid">
+      <div class="row">
+        <button onclick="waitHere()">Wait 1 Day</button>
+        <button onclick="refuel()" ${canRefuel ? '' : 'disabled'}>Refuel${canRefuel ? ` ($${refuelCost})` : ''}</button>
+      </div>
+      <div class="small">Waiting charges a docking / room fee and can still trigger rumors and events. Waiting favors broader market rumors; travel favors route rumors.</div>
+    </div>
+  `;
+}
+
+function renderBasePricesTable(locName) {
+  const basePrices = locations[locName].basePrices;
+  let html = `<div class="base-price-table"><b>Known base prices</b><br><div class="table-wrap"><table>
+    <tr><th>Commodity</th><th>Base</th></tr>`;
+
+  for (const g of goods) {
+    html += `<tr><td>${g.contraband ? "<span class='bad'>⚠</span> " : ""}${g.name}</td><td>$${basePrices[g.name]}</td></tr>`;
+  }
+
+  html += `</table></div><div class="small"><span class='bad'>⚠</span> = Contraband</div></div>`;
+  return html;
+}
+
+function renderTarget() {
+  if (!state.target) state.target = state.location;
+  const loc = locations[state.target];
+  const isCurrent = state.target === state.location;
+  const dist = travelDistance(state.location, state.target);
+  const fuelCost = Math.max(1, Math.ceil(dist / state.speed));
+  const canTravel = state.fuel >= fuelCost;
+  const active = rumors.filter(r => r.loc === state.target);
+  const rumorText = active.length
+    ? active.map(r => `${r.item} +${Math.round((r.strength - 1) * 100)}% (${r.expires - state.day}d left)`).join("<br>")
+    : "None";
+
+  document.getElementById("target").innerHTML = `
+    <b>Target</b><br>
+    ${isCurrent ? `${state.target} (Current Location)` : state.target}<br>
+    ${loc.lore}<br>
+    Faction: ${loc.faction}<br>
+    Police: ${loc.police}<br>
+    Distance: ${dist}<br>
+    Fuel Needed: ${fuelCost}<br>
+    ${isCurrent ? `Wait advances time by 1 day.` : `ETA: ${formatDate(state.day + dist)}`}<br>
+    Specialty: ${loc.bonus}<br>
+    Rumors:<br>${rumorText}<br>
+    ${visitedLocations.has(state.target)
+      ? renderBasePricesTable(state.target)
+      : `<br><b>Known base prices</b><br>Visit this location to reveal its base commodity prices.`}
+    <br>
+    <button onclick="${isCurrent ? 'waitHere()' : `travel('${state.target}')`}" ${(!isCurrent && !canTravel) ? 'disabled' : ''}>
+      ${isCurrent ? 'Wait 1 Day' : (canTravel ? 'Travel' : 'Travel (No Fuel)')}
+    </button>
+  `;
+}
+
+function renderMap() {
+  const map = document.getElementById("mapShell");
+  const w = map.clientWidth || 300;
+  const h = map.clientHeight || 280;
+  const px = (pct, size) => (pct / 100) * size;
+  let html = "";
+
+  if (state.target && state.target !== state.location) {
+    const a = locations[state.location];
+    const b = locations[state.target];
+    html += `<svg class="route-line" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+      <line x1="${px(a.x, w)}" y1="${px(a.y, h)}" x2="${px(b.x, w)}" y2="${px(b.y, h)}" stroke="#0f0" stroke-width="2" stroke-dasharray="6,5" />
+    </svg>`;
+  }
+
+  for (const [name, loc] of Object.entries(locations)) {
+    const dist = travelDistance(state.location, name);
+    const reachable = state.fuel >= Math.max(1, Math.ceil(dist / state.speed));
+    const isCurrent = name === state.location;
+    const isTarget = name === state.target;
+    const color = isCurrent ? "#ff0" : (reachable ? "#0f0" : "#555");
+    const hint = rumors.some(r => r.loc === name) ? "⚠ " : "";
+
+    html += `
+      <div class="map-node ${isCurrent ? 'current' : ''} ${isTarget ? 'selected' : ''}"
+           style="left:${loc.x}%; top:${loc.y}%; color:${color}"
+           onclick="setTarget('${name}')">
+        <span class="dot"></span>
+        <span>${hint}${name}</span>
+      </div>`;
+  }
+
+  map.innerHTML = html;
+}
+
+function renderExchange() {
+  let html = `<b>Exchange</b><div class="table-wrap"><table>
+    <tr><th>Item</th><th>Price</th><th>%</th><th>Owned (Avg)</th><th>Buy</th><th>Sell</th></tr>`;
+
+  for (const g of goods) {
+    const owned = state.cargo[g.name]?.qty || 0;
+    const avg = getAvg(g.name);
+    const pct = Math.round(((prices[g.name] - locations[state.location].basePrices[g.name]) / locations[state.location].basePrices[g.name]) * 100);
+    const pctClass = pct < 0 ? 'goodprice' : 'bad';
+
+    html += `
+      <tr>
+        <td>${g.contraband ? "<span class='bad'>⚠</span> " : ""}${g.name}</td>
+        <td>$${prices[g.name]}</td>
+        <td class="${pctClass}">${pct > 0 ? '+' : ''}${pct}%</td>
+        <td>${owned} @ $${avg}</td>
+        <td><button onclick="buy('${g.name}')">1</button><button onclick="buyAll('${g.name}')">All</button></td>
+        <td><button onclick="sell('${g.name}')">1</button><button onclick="sellAll('${g.name}')">All</button></td>
+      </tr>`;
+  }
+
+  html += `</table></div>`;
+  document.getElementById("exchange").innerHTML = html;
+}
+
+function renderConsole() {
+  document.getElementById("console").innerHTML = logs
+    .map(l => `<div class="log-${l.type}">Day ${state.day}: ${l.msg}</div>`)
+    .join("");
+}
+
+/* =====================
+   ACTIONS
+===================== */
+function setTarget(name) {
+  state.target = name;
+  update();
+}
+
 function refuel() {
-    const needed = state.maxFuel - state.fuel;
-    if (needed <= 0) {
-        log("Fuel tank already full", "neutral");
-        return;
-    }
+  const needed = state.maxFuel - state.fuel;
+  if (needed <= 0) {
+    log("Fuel tank already full", "neutral");
+    return;
+  }
+  const cost = needed * locations[state.location].police;
+  if (state.credits < cost) {
+    log(`Not enough credits to refuel ($${cost} needed)`, "neg");
+    return;
+  }
+  state.credits -= cost;
+  state.fuel = state.maxFuel;
+  log(`Refueled ${needed} for $${cost}`, "pos");
+  update();
+}
 
-    const rate = locations[state.location].fuelRate;
-    const cost = needed * rate;
-    if (state.credits < cost) {
-        log(`Not enough credits to refuel ($${cost} needed)`, "neg");
-        return;
-    }
+function buyAll(name) {
+  const p = prices[name];
+  const qty = Math.min(Math.floor(state.credits / p), state.cargoSpace - cargoCount());
+  if (qty <= 0) return;
+  const g = goods.find(x => x.name === name);
+  if (!state.cargo[name]) state.cargo[name] = { qty: 0, totalSpent: 0, contraband: g.contraband };
+  state.cargo[name].qty += qty;
+  state.cargo[name].totalSpent += qty * p;
+  state.credits -= qty * p;
+  log(`Bought ${qty} ${name}`, "pos");
+  update();
+}
 
-    state.credits -= cost;
-    state.fuel = state.maxFuel;
-    log(`Refueled ${needed} for $${cost}`, "neutral");
-    updateUI();
+function buy(name) {
+  const p = prices[name];
+  if (state.credits < p) return;
+  if (cargoCount() >= state.cargoSpace) return;
+  const g = goods.find(x => x.name === name);
+  if (!state.cargo[name]) state.cargo[name] = { qty: 0, totalSpent: 0, contraband: g.contraband };
+  state.cargo[name].qty += 1;
+  state.cargo[name].totalSpent += p;
+  state.credits -= p;
+  log(`Bought 1 ${name}`, "pos");
+  update();
+}
+
+function sell(name) {
+  const slot = state.cargo[name];
+  if (!slot || slot.qty <= 0) return;
+  const p = prices[name];
+  const avg = getAvg(name);
+  const profit = p - avg;
+  slot.qty -= 1;
+  slot.totalSpent = Math.max(0, slot.totalSpent - avg);
+  state.credits += p;
+  if (slot.qty <= 0) delete state.cargo[name];
+  log(`Sold 1 ${name} (${profit >= 0 ? '+' : ''}${profit})`, profit >= 0 ? 'pos' : 'neg');
+  update();
+}
+
+function sellAll(name) {
+  const slot = state.cargo[name];
+  if (!slot || slot.qty <= 0) return;
+  const p = prices[name];
+  const avg = getAvg(name);
+  const profit = (p - avg) * slot.qty;
+  state.credits += p * slot.qty;
+  delete state.cargo[name];
+  log(`Sold ALL ${name} (${profit >= 0 ? '+' : ''}${profit})`, profit >= 0 ? 'pos' : 'neg');
+  update();
 }
 
 function waitHere() {
-    target = state.location;
-    state.day += 1;
-    cleanupRumors();
-    if (Math.random() < 0.35) generateRumor();
-    prices = getPrices();
-    log(`Waited 1 day at ${state.location}`, "neutral");
-    updateUI();
+  const fee = 10 + Math.floor(state.day * 0.5);
+  if (state.credits < fee) {
+    log(`Not enough credits for docking fee ($${fee} needed)`, "neg");
+    return;
+  }
+
+  state.credits -= fee;
+  state.day += 1;
+  heat = Math.max(0, heat - 1);
+
+  cleanupRumors();
+  maybeGenerateRumor(true);
+  prices = getCurrentMarketPrices();
+
+  if (Math.random() < 0.45) randomEvent();
+
+  log(`Waited 1 day at ${state.location} (dock fee $${fee})`, "neutral");
+  update();
 }
 
-/* =====================
-   TRAVEL
-   ===================== */
 function travel(dest) {
-    if (!dest || !locations[dest]) return;
+  if (!locations[dest]) return;
+  if (dest === state.location) {
+    waitHere();
+    return;
+  }
 
-    const dist = travelDistance(state.location, dest);
-    if (state.fuel < dist) {
-        log(`Not enough fuel for ${dest} (${dist} required)`, "neg");
-        return;
-    }
+  const d = travelDistance(state.location, dest);
+  const fuelCost = Math.max(1, Math.ceil(d / state.speed));
+  if (state.fuel < fuelCost) {
+    log(`Not enough fuel for ${dest} (${fuelCost} required)`, "neg");
+    return;
+  }
 
-    const origin = state.location;
-    state.fuel -= dist;
-    state.location = dest;
-    state.day += dist;
-    visitedLocations.add(dest);
+  const origin = state.location;
+  state.fuel -= fuelCost;
+  state.day += d;
+  state.location = dest;
+  visitedLocations.add(dest);
+  heat = Math.max(0, heat - 1);
 
-    cleanupRumors();
-    if (Math.random() < 0.7) generateRumor();
-    prices = getPrices();
+  cleanupRumors();
+  maybeGenerateRumor(false);
+  prices = getCurrentMarketPrices();
+  randomEvent();
 
-    log(`Travel ${origin} → ${dest} (${dist}d)`, "neutral");
-    updateUI();
+  log(`Travel ${origin} → ${dest} (${d}d, fuel -${fuelCost})`, "neutral");
+  update();
 }
 
 /* =====================
-   INIT
-   ===================== */
-function runChecks() {
-    console.assert(document.getElementById("status"), "Status panel missing");
-    console.assert(document.getElementById("target"), "Target panel missing");
-    console.assert(document.getElementById("mapShell"), "Map panel missing");
-    console.assert(document.getElementById("market"), "Market panel missing");
-    console.assert(document.getElementById("console"), "Console panel missing");
-    console.assert(Object.keys(locations).length >= 4, "Expected multiple locations");
-    console.assert(goods.length >= 5, "Expected multiple goods");
+   UPGRADES
+===================== */
+function upgradeCostFor(statName) {
+  return 100 * (state[statName] + 1);
 }
 
-prices = getPrices();
-generateRumor();
-runChecks();
-updateUI();
+function upgrade(statName) {
+  const cost = upgradeCostFor(statName);
+  if (state.credits < cost) {
+    log(`Not enough credits for ${statName}`, "neg");
+    return;
+  }
+  state.credits -= cost;
+  state[statName] += 1;
+  log(`Upgraded ${statName} to ${state[statName]}`, "pos");
+  update();
+}
+
+/* =====================
+   INIT / UPDATE
+===================== */
+function update() {
+  renderShip();
+  renderStatus();
+  renderActions();
+  renderTarget();
+  renderMap();
+  renderExchange();
+  renderConsole();
+}
+
+prices = getCurrentMarketPrices();
+maybeGenerateRumor();
+update();
 </script>
 </body>
 </html>
