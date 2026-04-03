@@ -797,6 +797,10 @@ function travel(dest) {
    UPGRADES
 ===================== */
 function upgradeCostFor(statName) {
+  if (statName=="cargoSpace" OR "maxFuel")
+  {
+    return 5 * (state[statName] + 20);
+  }
   return 100 * (state[statName] + 1);
 }
 
